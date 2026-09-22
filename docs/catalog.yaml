@@ -1,0 +1,23 @@
+# Canonical catalog pin lives in NousResearch/hermes-agent plugin-catalog/needs-you.yaml.
+
+name: needs-you
+repo: https://github.com/aydnOktay/hermes-needs-you
+sha: REPLACE_WITH_40_CHAR_COMMIT
+description: Hermes is waiting — full Desktop page for pending approvals.
+  Queue, chip, OS notify. Redacted previews only. No API keys.
+maintainer: aydnOktay
+tier: community
+category: desktop
+requires_hermes: ">=0.21"
+docs_url: https://github.com/aydnOktay/hermes-needs-you
+version: "0.1.0"
+platforms: []
+capabilities:
+  provides_tools:
+  - needs_you_list
+  - needs_you_clear
+  provides_hooks:
+  - pre_approval_request
+  - post_approval_response
+  provides_middleware: []
+  requires_env: []

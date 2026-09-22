@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+*.json.tmp
+.DS_Store
+.git/COMMITMSG
+.git/COMMIT_OID.txt

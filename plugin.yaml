@@ -1,0 +1,38 @@
+name: needs-you
+version: 0.1.0
+manifest_version: 1
+api_version: 1
+description: >
+  Hermes is waiting. One full Desktop page for everything that needs you —
+  pending approval queue, status chip, OS notify. Approve or deny from the
+  desk (gateway RPC) or jump to the session. Disclosure — stores redacted
+  command previews and approval metadata under plugin-data; does not send
+  anything off-machine. No API keys.
+author: aydnOktay
+license: MIT
+homepage: https://github.com/aydnOktay/hermes-needs-you
+requires_hermes: ">=0.21"
+tags: [desktop, approvals, notifications, status, tools]
+provides_tools:
+  - needs_you_list
+  - needs_you_clear
+provides_hooks:
+  - pre_approval_request
+  - post_approval_response
+config_schema:
+  max_pending:
+    type: int
+    default: 40
+    description: Maximum pending approvals kept on disk.
+  max_history:
+    type: int
+    default: 30
+    description: Maximum resolved approvals kept for the history strip.
+  os_notify:
+    type: bool
+    default: true
+    description: OS notification when a new approval arrives (Desktop).
+  sound:
+    type: bool
+    default: true
+    description: Short chime when a new approval arrives (Desktop).
