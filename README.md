@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Needs You — Hermes Agent" width="160" />
+</p>
+
 # Needs You
 
 **Hermes is waiting. One page for everything that needs you.**
