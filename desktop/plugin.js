@@ -459,7 +459,9 @@ function StatusChip({ ctx }) {
 
 export default {
   id: 'needs-you',
-  setup(ctx) {
+  name: 'Needs You',
+  defaultEnabled: true,
+  register(ctx) {
     ctx.registerMany([
       {
         id: 'page',
