@@ -2,7 +2,7 @@
 
 name: needs-you
 repo: https://github.com/aydnOktay/hermes-needs-you
-sha: REPLACE_WITH_40_CHAR_COMMIT
+sha: baca1ceb69d7363960b699e197572d17025cc20e
 description: Hermes is waiting — full Desktop page for pending approvals.
   Queue, chip, OS notify. Redacted previews only. No API keys.
 maintainer: aydnOktay
