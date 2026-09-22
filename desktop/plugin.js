@@ -2,6 +2,7 @@
  * Needs You — Hermes is waiting. One full page for everything that needs you.
  *
  * Unified package: copy to $HERMES_HOME/desktop-plugins/needs-you/.
+ * Visual language: Hermes UI kit + --ui-* / --chrome-* tokens only.
  */
 
 import {
@@ -12,6 +13,11 @@ import {
   ROUTES_AREA,
   SIDEBAR_NAV_AREA,
   STATUSBAR_AREAS,
+  Button,
+  Badge,
+  Separator,
+  EmptyState,
+  StatusDot,
 } from '@hermes/plugin-sdk'
 import { jsx, jsxs } from 'react/jsx-runtime'
 import { useEffect, useRef } from 'react'
@@ -25,28 +31,162 @@ function ensureStyles() {
   const el = document.createElement('style')
   el.setAttribute('data-needs-you', '1')
   el.textContent = `
-    @keyframes ny-pulse {
-      0%, 100% { opacity: 0.35; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.15); }
+    .ny-root {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: auto;
+      box-sizing: border-box;
+      padding: 28px 32px 48px;
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--ui-text-secondary);
     }
-    @keyframes ny-fade-up {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    .ny-kicker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 11px;
+      line-height: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ui-text-tertiary);
     }
-    @keyframes ny-chip-glow {
-      0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ui-accent) 0%, transparent); }
-      50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 22%, transparent); }
+    .ny-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 28px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ui-text-primary);
     }
-    .ny-page { animation: ny-fade-up 0.45s ease-out; }
-    .ny-card { animation: ny-fade-up 0.4s ease-out both; }
-    .ny-card:nth-child(1) { animation-delay: 0.04s; }
-    .ny-card:nth-child(2) { animation-delay: 0.08s; }
-    .ny-card:nth-child(3) { animation-delay: 0.12s; }
-    .ny-dot { animation: ny-pulse 1.8s ease-in-out infinite; }
-    .ny-chip-live { animation: ny-chip-glow 2.2s ease-in-out infinite; }
-    .ny-btn:hover { filter: brightness(1.08); }
-    .ny-btn:active { transform: translateY(1px); }
-    .ny-btn:disabled { opacity: 0.45; cursor: wait; }
+    .ny-lede {
+      margin: 8px 0 0;
+      font-size: 12px;
+      line-height: 18px;
+      max-width: 34rem;
+      color: var(--ui-text-tertiary);
+    }
+    .ny-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+      margin-bottom: 4px;
+    }
+    .ny-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .ny-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 12px 11px;
+      border-radius: 4px;
+      background: var(--ui-bg-quaternary);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-stroke-secondary) 55%, transparent);
+    }
+    .ny-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ny-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .ny-card-name {
+      font-size: 13px;
+      line-height: 18px;
+      font-weight: 600;
+      color: var(--ui-text-primary);
+      text-transform: capitalize;
+    }
+    .ny-card-when {
+      font-size: 11px;
+      line-height: 16px;
+      color: var(--ui-text-quaternary);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .ny-card-desc {
+      font-size: 12px;
+      line-height: 18px;
+      color: var(--ui-text-secondary);
+    }
+    .ny-pre {
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 11px;
+      line-height: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--ui-text-secondary);
+      background: var(--ui-bg-secondary, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-stroke-secondary) 45%, transparent);
+      border-radius: 2.5px;
+      font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    }
+    .ny-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 2px;
+    }
+    .ny-history {
+      margin-top: 28px;
+    }
+    .ny-history-label {
+      font-size: 11px;
+      line-height: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ui-text-tertiary);
+      margin-bottom: 8px;
+    }
+    .ny-history-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+      padding: 8px 0;
+    }
+    .ny-history-choice {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 500;
+      color: var(--ui-text-secondary);
+    }
+    .ny-history-pattern {
+      font-size: 11px;
+      line-height: 16px;
+      color: var(--ui-text-tertiary);
+      margin-top: 2px;
+      text-transform: capitalize;
+    }
+    .ny-history-time {
+      font-size: 11px;
+      line-height: 16px;
+      color: var(--ui-text-quaternary);
+      font-variant-numeric: tabular-nums;
+    }
+    .ny-empty-wrap {
+      margin-top: 12px;
+      border-radius: 4px;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-stroke-secondary) 45%, transparent);
+      background: color-mix(in srgb, var(--ui-bg-quaternary) 70%, transparent);
+    }
   `
   document.head.appendChild(el)
 }
@@ -192,222 +332,85 @@ function choiceLabel(choice) {
   return choice || 'Resolved'
 }
 
-function btnStyle(kind) {
-  const base = {
-    fontSize: 12,
-    padding: '7px 12px',
-    borderRadius: 7,
-    cursor: 'pointer',
-    fontWeight: 500,
-    letterSpacing: '0.01em',
-    transition: 'filter 0.12s ease, transform 0.08s ease',
-  }
-  if (kind === 'primary') {
-    return {
-      ...base,
-      color: 'var(--ui-text-on-accent, var(--ui-text-primary))',
-      background: 'var(--ui-accent)',
-      border: '1px solid transparent',
-    }
-  }
-  if (kind === 'danger') {
-    return {
-      ...base,
-      color: 'var(--ui-text-primary)',
-      background: 'transparent',
-      border: '1px solid color-mix(in srgb, var(--ui-text-primary) 28%, transparent)',
-    }
-  }
-  return {
-    ...base,
-    color: 'var(--ui-text-secondary)',
-    background: 'transparent',
-    border: '1px solid var(--ui-stroke-secondary)',
-  }
-}
-
 function ItemCard({ item, onRespond, onDismiss, busy }) {
   const title = (item.pattern_key || 'approval').replace(/_/g, ' ')
-  const when = formatWhen(item.at)
   return jsxs('article', {
     className: 'ny-card',
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-      padding: '18px 18px 16px',
-      marginBottom: 12,
-      borderRadius: 10,
-      border: '1px solid var(--ui-stroke-secondary)',
-      background:
-        'linear-gradient(135deg, color-mix(in srgb, var(--ui-accent) 6%, transparent) 0%, transparent 42%)',
-      boxShadow: 'inset 3px 0 0 0 var(--ui-accent)',
-    },
     children: [
       jsxs('div', {
-        style: { display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'flex-start' },
+        className: 'ny-card-top',
         children: [
           jsxs('div', {
             style: { minWidth: 0 },
             children: [
               jsxs('div', {
-                style: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+                className: 'ny-card-meta',
                 children: [
-                  jsx('span', {
-                    className: 'ny-dot',
-                    style: {
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: 'var(--ui-accent)',
-                      display: 'inline-block',
-                      flexShrink: 0,
-                    },
-                  }),
-                  jsx('span', {
-                    style: {
-                      fontWeight: 650,
-                      fontSize: 15,
-                      color: 'var(--ui-text-primary)',
-                      textTransform: 'capitalize',
-                    },
-                    children: title,
-                  }),
-                  jsx('span', {
-                    style: {
-                      fontSize: 10,
-                      letterSpacing: '0.06em',
-                      textTransform: 'uppercase',
-                      padding: '2px 7px',
-                      borderRadius: 999,
-                      border: '1px solid var(--ui-stroke-secondary)',
-                      color: 'var(--ui-text-tertiary)',
-                    },
+                  jsx(StatusDot, { tone: 'warn' }),
+                  jsx('span', { className: 'ny-card-name', children: title }),
+                  jsx(Badge, {
+                    variant: 'secondary',
                     children: item.surface || 'approval',
                   }),
                 ],
               }),
               jsx('div', {
-                style: { fontSize: 11, color: 'var(--ui-text-quaternary, var(--ui-text-tertiary))', marginTop: 6 },
-                children: when || 'just now',
+                className: 'ny-card-when',
+                children: formatWhen(item.at) || 'just now',
               }),
             ],
           }),
-          jsx('button', {
+          jsx(Button, {
             type: 'button',
-            className: 'ny-btn',
+            variant: 'ghost',
+            size: 'xs',
             onClick: () => openSession(item),
-            style: btnStyle('quiet'),
             children: 'Open session',
           }),
         ],
       }),
       item.description
-        ? jsx('div', {
-            style: { fontSize: 13, lineHeight: 1.5, color: 'var(--ui-text-secondary)' },
-            children: item.description,
-          })
+        ? jsx('div', { className: 'ny-card-desc', children: item.description })
         : null,
       item.command_preview
-        ? jsx('pre', {
-            style: {
-              margin: 0,
-              padding: '12px 14px',
-              fontSize: 12,
-              lineHeight: 1.45,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              color: 'var(--ui-text-secondary)',
-              background: 'color-mix(in srgb, var(--ui-bg-secondary, transparent) 80%, transparent)',
-              border: '1px solid var(--ui-stroke-secondary)',
-              borderRadius: 8,
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-            },
-            children: item.command_preview,
-          })
+        ? jsx('pre', { className: 'ny-pre', children: item.command_preview })
         : null,
       jsxs('div', {
-        style: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 2 },
+        className: 'ny-actions',
         children: [
-          jsx('button', {
+          jsx(Button, {
             type: 'button',
-            className: 'ny-btn',
+            variant: 'default',
+            size: 'xs',
             disabled: busy,
             onClick: () => onRespond(item, 'once'),
-            style: btnStyle('primary'),
             children: 'Approve once',
           }),
-          jsx('button', {
+          jsx(Button, {
             type: 'button',
-            className: 'ny-btn',
+            variant: 'secondary',
+            size: 'xs',
             disabled: busy,
             onClick: () => onRespond(item, 'session'),
-            style: btnStyle('quiet'),
             children: 'Allow session',
           }),
-          jsx('button', {
+          jsx(Button, {
             type: 'button',
-            className: 'ny-btn',
+            variant: 'outline',
+            size: 'xs',
             disabled: busy,
             onClick: () => onRespond(item, 'deny'),
-            style: btnStyle('danger'),
             children: 'Deny',
           }),
-          jsx('button', {
+          jsx(Button, {
             type: 'button',
-            className: 'ny-btn',
+            variant: 'ghost',
+            size: 'xs',
             disabled: busy,
             onClick: () => onDismiss(item),
-            style: { ...btnStyle('quiet'), opacity: 0.75 },
             children: 'Dismiss',
           }),
         ],
-      }),
-    ],
-  })
-}
-
-function EmptyState() {
-  return jsxs('div', {
-    style: {
-      marginTop: 28,
-      padding: '36px 28px',
-      borderRadius: 12,
-      border: '1px dashed var(--ui-stroke-secondary)',
-      background:
-        'radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--ui-accent) 10%, transparent), transparent 55%)',
-      textAlign: 'left',
-    },
-    children: [
-      jsx('div', {
-        style: {
-          fontSize: 12,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          color: 'var(--ui-text-tertiary)',
-          marginBottom: 10,
-        },
-        children: 'All clear',
-      }),
-      jsx('div', {
-        style: {
-          fontSize: 17,
-          fontWeight: 600,
-          color: 'var(--ui-text-primary)',
-          marginBottom: 8,
-          lineHeight: 1.35,
-        },
-        children: 'Nothing needs you right now.',
-      }),
-      jsx('div', {
-        style: {
-          fontSize: 13,
-          lineHeight: 1.55,
-          color: 'var(--ui-text-secondary)',
-          maxWidth: 440,
-        },
-        children:
-          'When the agent hits a dangerous command, it lands here with a redacted preview. Approve once, allow for the session, or deny — or open the session to decide in chat.',
       }),
     ],
   })
@@ -447,119 +450,59 @@ function NeedsPage({ ctx }) {
   }
 
   return jsxs('div', {
-    className: 'ny-page',
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      overflow: 'auto',
-      padding: '36px 40px 64px',
-      maxWidth: 760,
-      margin: '0 auto',
-      color: 'var(--ui-text-secondary)',
-      boxSizing: 'border-box',
-    },
+    className: 'ny-root',
     children: [
       jsx(NeedsWatcher, { ctx }),
       jsxs('header', {
-        style: { marginBottom: 8 },
         children: [
           jsxs('div', {
-            style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 },
+            className: 'ny-kicker',
             children: [
-              jsx('span', {
-                className: waiting ? 'ny-dot' : undefined,
-                style: {
-                  width: 9,
-                  height: 9,
-                  borderRadius: '50%',
-                  background: waiting ? 'var(--ui-accent)' : 'var(--ui-stroke-secondary)',
-                  display: 'inline-block',
-                },
-              }),
-              jsx('span', {
-                style: {
-                  fontSize: 11,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ui-text-tertiary)',
-                  fontWeight: 600,
-                },
-                children: 'Needs You',
-              }),
+              jsx(StatusDot, { tone: waiting ? 'warn' : 'muted' }),
+              'Needs You',
             ],
           }),
           jsx('h1', {
-            style: {
-              margin: 0,
-              fontSize: 'clamp(28px, 4vw, 36px)',
-              fontWeight: 700,
-              lineHeight: 1.15,
-              letterSpacing: '-0.02em',
-              color: 'var(--ui-text-primary)',
-            },
-            children: waiting ? 'Hermes is waiting.' : 'You are clear.',
+            className: 'ny-title',
+            children: waiting ? 'Hermes is waiting.' : 'Nothing waiting.',
           }),
           jsx('p', {
-            style: {
-              margin: '12px 0 0',
-              fontSize: 14,
-              lineHeight: 1.55,
-              maxWidth: 480,
-              color: 'var(--ui-text-secondary)',
-            },
+            className: 'ny-lede',
             children: waiting
-              ? `${pending.length} approval${pending.length === 1 ? '' : 's'} need your call. Decide here or open the session.`
-              : 'Leave the chat. When something needs consent, it shows up on this page and the chip lights up.',
+              ? `${pending.length} approval${pending.length === 1 ? '' : 's'} need a decision. Approve here or open the session.`
+              : 'Dangerous commands land here with a redacted preview. Leave the chat — return when the chip lights up.',
           }),
         ],
       }),
       jsxs('div', {
-        style: {
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-          marginTop: 20,
-          marginBottom: 8,
-          alignItems: 'center',
-        },
+        className: 'ny-toolbar',
         children: [
-          jsx('div', {
-            style: {
-              fontSize: 12,
-              padding: '5px 10px',
-              borderRadius: 999,
-              border: '1px solid var(--ui-stroke-secondary)',
-              color: waiting ? 'var(--ui-text-primary)' : 'var(--ui-text-tertiary)',
-              background: waiting
-                ? 'color-mix(in srgb, var(--ui-accent) 12%, transparent)'
-                : 'transparent',
-              fontWeight: waiting ? 600 : 400,
-            },
-            children: waiting ? `${pending.length} waiting` : 'Queue empty',
+          jsx(Badge, {
+            variant: waiting ? 'default' : 'secondary',
+            children: waiting ? `${pending.length} waiting` : 'Clear',
           }),
-          jsx('button', {
+          jsx(Button, {
             type: 'button',
-            className: 'ny-btn',
+            variant: 'ghost',
+            size: 'xs',
             onClick: () => settingsMut.mutate({ muted: !settings.muted }),
-            style: btnStyle('quiet'),
-            children: settings.muted ? 'Unmute alerts' : 'Mute alerts',
+            children: settings.muted ? 'Unmute' : 'Mute',
           }),
           waiting
-            ? jsx('button', {
+            ? jsx(Button, {
                 type: 'button',
-                className: 'ny-btn',
+                variant: 'ghost',
+                size: 'xs',
                 disabled: clearMut.isPending,
                 onClick: () => clearMut.mutate(),
-                style: btnStyle('quiet'),
-                children: 'Clear local queue',
+                children: 'Clear queue',
               })
             : null,
         ],
       }),
       waiting
         ? jsx('div', {
-            style: { marginTop: 16 },
+            className: 'ny-list',
             children: pending
               .slice()
               .reverse()
@@ -576,77 +519,52 @@ function NeedsPage({ ctx }) {
                 ),
               ),
           })
-        : jsx(EmptyState, {}),
+        : jsx('div', {
+            className: 'ny-empty-wrap',
+            children: jsx(EmptyState, {
+              title: 'All clear',
+              description:
+                'When an approval is required, it appears in this queue with Approve / Deny actions.',
+            }),
+          }),
       history.length
         ? jsxs('section', {
-            style: { marginTop: 40 },
+            className: 'ny-history',
             children: [
-              jsx('div', {
-                style: {
-                  fontSize: 11,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ui-text-tertiary)',
-                  fontWeight: 600,
-                  marginBottom: 14,
-                },
-                children: 'Recent decisions',
-              }),
-              jsx('div', {
-                style: {
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0,
-                  borderTop: '1px solid var(--ui-stroke-secondary)',
-                },
-                children: history.slice(0, 8).map((it) =>
-                  jsxs(
-                    'div',
-                    {
-                      style: {
-                        display: 'grid',
-                        gridTemplateColumns: '1fr auto',
-                        gap: 12,
-                        alignItems: 'baseline',
-                        padding: '11px 0',
-                        borderBottom: '1px solid var(--ui-stroke-secondary)',
-                      },
-                      children: [
-                        jsxs('div', {
-                          children: [
-                            jsx('div', {
-                              style: {
-                                fontSize: 13,
-                                color: 'var(--ui-text-secondary)',
-                                fontWeight: 500,
-                              },
-                              children: choiceLabel(it.choice),
-                            }),
-                            jsx('div', {
-                              style: {
-                                fontSize: 12,
-                                color: 'var(--ui-text-tertiary)',
-                                marginTop: 2,
-                                textTransform: 'capitalize',
-                              },
-                              children: (it.pattern_key || 'approval').replace(/_/g, ' '),
-                            }),
-                          ],
-                        }),
-                        jsx('div', {
-                          style: {
-                            fontSize: 11,
-                            color: 'var(--ui-text-quaternary, var(--ui-text-tertiary))',
-                            fontVariantNumeric: 'tabular-nums',
-                          },
-                          children: formatWhen(it.resolved_at || it.at),
-                        }),
-                      ],
-                    },
-                    `${it.id}-h`,
-                  ),
+              jsx('div', { className: 'ny-history-label', children: 'Recent decisions' }),
+              jsx(Separator, {}),
+              ...history.slice(0, 8).map((it, index) =>
+                jsxs(
+                  'div',
+                  {
+                    children: [
+                      jsxs('div', {
+                        className: 'ny-history-row',
+                        children: [
+                          jsxs('div', {
+                            children: [
+                              jsx('div', {
+                                className: 'ny-history-choice',
+                                children: choiceLabel(it.choice),
+                              }),
+                              jsx('div', {
+                                className: 'ny-history-pattern',
+                                children: (it.pattern_key || 'approval').replace(/_/g, ' '),
+                              }),
+                            ],
+                          }),
+                          jsx('div', {
+                            className: 'ny-history-time',
+                            children: formatWhen(it.resolved_at || it.at),
+                          }),
+                        ],
+                      }),
+                      index < Math.min(history.length, 8) - 1 ? jsx(Separator, {}) : null,
+                    ],
+                  },
+                  `${it.id}-h`,
                 ),
-              }),
+              ),
             ],
           })
         : null,
@@ -662,29 +580,15 @@ function StatusChip({ ctx }) {
   const live = count > 0 && !muted
   const label = muted ? 'muted' : count ? `needs you ${count}` : 'needs you'
   return jsxs('span', {
-    style: { display: 'inline-flex', alignItems: 'center', gap: 6 },
+    style: { display: 'inline-flex', alignItems: 'center', gap: 4 },
     children: [
       jsx(NeedsWatcher, { ctx }),
-      jsx('button', {
+      jsx(Button, {
         type: 'button',
-        className: live ? 'ny-chip-live' : undefined,
+        variant: live ? 'secondary' : 'ghost',
+        size: 'xs',
         title: 'Open Needs You',
         onClick: () => host.navigate(PAGE_PATH),
-        style: {
-          fontSize: 11,
-          padding: '3px 9px',
-          borderRadius: 999,
-          border: live
-            ? '1px solid color-mix(in srgb, var(--ui-accent) 55%, var(--ui-stroke-secondary))'
-            : '1px solid var(--ui-stroke-secondary)',
-          background: live
-            ? 'color-mix(in srgb, var(--ui-accent) 16%, transparent)'
-            : 'transparent',
-          color: live ? 'var(--ui-text-primary)' : 'var(--ui-text-tertiary)',
-          cursor: 'pointer',
-          fontWeight: live ? 650 : 400,
-          letterSpacing: '0.01em',
-        },
         children: label,
       }),
     ],
